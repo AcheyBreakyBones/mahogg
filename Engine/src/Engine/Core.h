@@ -1,11 +1,17 @@
 #pragma once
 
 #ifdef EN_PLATFORM_WINDOWS
+// only build the DLL for import/export if Dynamic Linking is enabled
+// otherwise, define ENGINE_API as empty to link statically
+#if EN_DYNAMIC_LINK
   #ifdef EN_BUILD_DLL
     #define ENGINE_API __declspec(dllexport)
   #else
     #define ENGINE_API __declspec(dllimport)
   #endif
+#else
+  #define ENGINE_API
+#endif
 #else
   #error Engine only supports Windows!
 #endif

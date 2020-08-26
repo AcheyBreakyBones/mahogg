@@ -16,6 +16,7 @@ IncludeDir = {}
 IncludeDir["GLFW"] = "Engine/vendor/GLFW/include"
 IncludeDir["Glad"] = "Engine/vendor/Glad/include"
 IncludeDir["ImGui"] = "Engine/vendor/imgui"
+IncludeDir["glm"] = "Engine/vendor/glm"
 
 include "Engine/vendor/GLFW"
 include "Engine/vendor/Glad"
@@ -23,9 +24,10 @@ include "Engine/vendor/imgui"
   
 project "Engine"
   location "Engine"
-  kind "SharedLib"
+  kind "StaticLib"
   language "C++"
-  staticruntime "off"
+  cppdialect "C++17"
+  staticruntime "on"
   
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -36,7 +38,14 @@ project "Engine"
   files
   {
     "%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp"
+		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/vendor/glm/glm/**.hpp",
+		"%{prj.name}/vendor/glm/glm/**.inl"
+  }
+
+  defines
+  {
+    "_CRT_SECURE_NO_WARNINGS"
   }
   
   includedirs
@@ -45,7 +54,8 @@ project "Engine"
     "%{prj.name}/vendor/spdlog/include",
     "%{IncludeDir.GLFW}",
     "%{IncludeDir.Glad}",
-    "%{IncludeDir.ImGui}"
+    "%{IncludeDir.ImGui}",
+    "%{IncludeDir.glm}"
   }
 
   links
@@ -57,7 +67,6 @@ project "Engine"
   }
   
   filter "system:windows"
-    cppdialect "C++17"
     systemversion "latest"
     
     defines
@@ -67,31 +76,27 @@ project "Engine"
         "GLFW_INCLUDE_NONE"
     }
     
-    postbuildcommands
-    {
-      ("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
-    }
-    
     filter "configurations:Debug"
       defines "EN_DEBUG"
       runtime "Debug"
-      symbols "On"
+      symbols "on"
     
     filter "configurations:Release"
       defines "EN_RELEASE"
       runtime "Release"
-      optimize "On"
+      optimize "on"
       
     filter "configurations:Dist"
       defines "EN_DIST"
       runtime "Release"
-      optimize "On"
+      optimize "on"
       
 project "Sandbox"
   location "Sandbox"
   kind "ConsoleApp"
   language "C++"
-  staticruntime "off"
+  cppdialect "C++17"
+  staticruntime "on"
   
   targetdir ("bin/" .. outputdir .. "/%{prj.name}")
   objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -105,7 +110,9 @@ project "Sandbox"
   includedirs
   {
     "Engine/vendor/spdlog/include",
-    "Engine/src"
+    "Engine/src",
+    "Engine/vendor",
+    "%{IncludeDir.glm}"
   }
   
   links
@@ -114,7 +121,6 @@ project "Sandbox"
   }
   
   filter "system:windows"
-    cppdialect "C++17"
     systemversion "latest"
     
   defines
@@ -125,14 +131,14 @@ project "Sandbox"
     filter "configurations:Debug"
       defines "EN_DEBUG"
       runtime "Debug"
-      symbols "On"
+      symbols "on"
     
     filter "configurations:Release"
       defines "EN_RELEASE"
       runtime "Release"
-      optimize "On"
+      optimize "on"
       
     filter "configurations:Dist"
       defines "EN_DIST"
       runtime "Release"
-      optimize "On"
+      optimize "on"
