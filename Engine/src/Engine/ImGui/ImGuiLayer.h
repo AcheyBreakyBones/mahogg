@@ -32,8 +32,8 @@ namespace Engine
     bool OnKeyTypedEvent(KeyTypedEvent& e);
     bool OnWindowResizeEvent(WindowResizeEvent& e);
     */
-  private:
-    float m_Time = 0.0f;
+  //private:
+  //  float m_Time = 0.0f;
   };
 }
 

@@ -7,11 +7,11 @@
 #include "Engine/Events/Event.h"
 #include "Engine/Events/ApplicationEvent.h"
 #include "Engine/ImGui/ImGuiLayer.h"
-#include "Engine/Renderer/Shader.h"
+#include "Engine/Core/Timestep.h"
 
 namespace Engine
 {
-  class ENGINE_API Application
+  class Application
   {
   public:
     Application();
@@ -30,8 +30,7 @@ namespace Engine
     ImGuiLayer* m_ImGuiLayer;
     bool m_Running = true;
     LayerStack m_LayerStack;
-    unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
-    std::unique_ptr<Shader> m_Shader;
+    float m_LastFrameTime = 0.0f;
   private:
     static Application* s_Instance;
   };
