@@ -4,6 +4,8 @@
 #include "Engine/Core.h"
 #include "Engine/Events/Event.h"
 
+// Base class for WindowsWindow
+
 namespace Engine
 {
   struct WindowProps

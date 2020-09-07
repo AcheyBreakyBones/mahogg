@@ -1,8 +1,10 @@
 #include <Engine.h>
-#include "Engine/KeyCodes.h"
+#include "Platform/OpenGL/OpenGLShader.h"
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
+// This is where the Vertex Arrays and Shaders are defined
 class ExampleLayer : public Engine::Layer
 {
 public:
@@ -10,8 +12,9 @@ public:
     : Layer("Example"), m_Camera(-1.6f, 1.6f, -0.9f, 0.9f), m_CameraPosition(0.0f)
   {
     // Vertex Array
-    m_VertexArray.reset(Engine::VertexArray::Create());
+    m_TriangleVA.reset(Engine::VertexArray::Create());
 
+    // Vertex Buffer (x, y, z, R, G, B, A)
     float vertices[3 * 7] =
     {
       -0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
@@ -19,44 +22,62 @@ public:
        0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
     };
 
-    std::shared_ptr<Engine::VertexBuffer> vertexBuffer;
+    // Store vertices in vertex buffer
+    Engine::Ref<Engine::VertexBuffer> vertexBuffer;
     vertexBuffer.reset(Engine::VertexBuffer::Create(vertices, sizeof(vertices)));
+
+    // Layout and Index Buffer contained in this scope
+    // (don't need them anymore once they get stored in vertex array)
     {
+      // Layout
+      // First three floats of VB are x, y, and z
+      // Second four floats are R, G, B, and A
       Engine::BufferLayout layout = {
         { Engine::ShaderDataType::Float3, "a_Position" },
         { Engine::ShaderDataType::Float4, "a_Color" }
       };
+
+      // Set VB's layer and then add it to the VA
       vertexBuffer->SetLayout(layout);
-      m_VertexArray->AddVertexBuffer(vertexBuffer);
+      m_TriangleVA->AddVertexBuffer(vertexBuffer);
 
-      // Index Buffer
+      // Index Buffer (aka: the order in which vertices are drawn)
       uint32_t indices[3] = { 0, 1, 2 };
-      std::shared_ptr<Engine::IndexBuffer> indexBuffer;
+      Engine::Ref<Engine::IndexBuffer> indexBuffer;
       indexBuffer.reset(Engine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
-      m_VertexArray->SetIndexBuffer(indexBuffer);
+      m_TriangleVA->SetIndexBuffer(indexBuffer);
 
+      // Now this VA is complete
       m_SquareVA.reset(Engine::VertexArray::Create());
 
-      float squareVertices[3 * 4] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.5f,  0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f,
+      // Vertex Buffer (x, y, z, U, V)
+      // U and V are Texture Coordinates
+      float squareVertices[5 * 4] = {
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+         0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f
       };
 
-      std::shared_ptr<Engine::VertexBuffer> squareVB;
+      // Set layout and add VB to VA
+      Engine::Ref<Engine::VertexBuffer> squareVB;
       squareVB.reset(Engine::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
       squareVB->SetLayout({
-        { Engine::ShaderDataType::Float3, "a_Position" }
+        { Engine::ShaderDataType::Float3, "a_Position" },
+        { Engine::ShaderDataType::Float2, "a_TexCoord" }
         });
       m_SquareVA->AddVertexBuffer(squareVB);
 
+      // Index Buffer
       uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-      std::shared_ptr<Engine::IndexBuffer> squareIB;
+      Engine::Ref<Engine::IndexBuffer> squareIB;
       squareIB.reset(Engine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
       m_SquareVA->SetIndexBuffer(squareIB);
     }
 
+    // Shaders
+
+    // Triangle
     std::string vertexSrc = R"(
 			#version 330 core
 			
@@ -91,9 +112,10 @@ public:
 			}
 		)";
 
-    m_Shader.reset(new Engine::Shader(vertexSrc, fragmentSrc));
+    m_TriangleShader.reset(Engine::Shader::Create(vertexSrc, fragmentSrc));
 
-    std::string blueShaderVertexSrc = R"(
+    // Square Grid
+    std::string flatColorShaderVertexSrc = R"(
 			#version 330 core
 			
 			layout(location = 0) in vec3 a_Position;
@@ -110,21 +132,65 @@ public:
 			}
 		)";
 
-    std::string blueShaderFragmentSrc = R"(
+    std::string flatColorShaderFragmentSrc = R"(
 			#version 330 core
 			
 			layout(location = 0) out vec4 color;
+
 			in vec3 v_Position;
+
+      uniform vec3 u_Color;
 
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = vec4(u_Color, 1.0);
 			}
 		)";
 
-    m_BlueShader.reset(new Engine::Shader(blueShaderVertexSrc, blueShaderFragmentSrc));
+    m_FlatColorShader.reset(Engine::Shader::Create(flatColorShaderVertexSrc, flatColorShaderFragmentSrc));
+
+    // Texture Shader
+    std::string textureShaderVertexSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) in vec3 a_Position;
+			layout(location = 1) in vec2 a_TexCoord;
+
+      uniform mat4 u_ViewProjection;
+      uniform mat4 u_Transform;
+
+			out vec2 v_TexCoord;
+
+			void main()
+			{
+				v_TexCoord = a_TexCoord;
+				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);
+			}
+		)";
+
+    std::string textureShaderFragmentSrc = R"(
+			#version 330 core
+			
+			layout(location = 0) out vec4 color;
+
+			in vec2 v_TexCoord;
+
+      uniform sampler2D u_Texture;
+
+			void main()
+			{
+				color = texture(u_Texture, v_TexCoord);
+			}
+		)";
+
+    m_TextureShader.reset(Engine::Shader::Create(textureShaderVertexSrc, textureShaderFragmentSrc));
+    //m_Texture = Engine::Texture2D::Create("assets/textures/Checkerboard.png");
+    m_KirbyTexture = Engine::Texture2D::Create("assets/textures/Kirby.png");
+    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_TextureShader)->Bind();
+    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
   }
 
+  // Inputs and Rendering are handled here
   void OnUpdate(Engine::Timestep dt) override 
   { 
     if (Engine::Input::IsKeyPressed((int)FunctionKeys::EN_KEY_LEFT))
@@ -164,48 +230,60 @@ public:
 
     // ACTION! (begin scene)
     Engine::Renderer::BeginScene(m_Camera);
-
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_FlatColorShader)->Bind();
+    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+
     for (int y = 0; y < 20; ++y)
     {
       for (int x = 0; x < 20; ++x)
       {
         glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
         glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-        Engine::Renderer::Submit(m_BlueShader, m_SquareVA, transform);
+        Engine::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
       }
     }
-    Engine::Renderer::Submit(m_Shader, m_VertexArray);
+    //Engine::Renderer::Submit(m_Shader, m_VertexArray);
+    //m_Texture->Bind();
+    //Engine::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+    m_KirbyTexture->Bind();
+    Engine::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
     // CUT! (end scene)
     Engine::Renderer::EndScene();
   }
 
-
+  // Handles trigger events
   void OnEvent(Engine::Event& event) override 
   { 
   
   }
 
+  // Renders ImGui windows
   virtual void OnImGuiRender() override
   {
-    
+    ImGui::Begin("Settings");
+    ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
+    ImGui::End();
   }
 
 private:
-  std::shared_ptr<Engine::Shader> m_Shader;
-  std::shared_ptr<Engine::VertexArray> m_VertexArray;
-
-  std::shared_ptr<Engine::Shader> m_BlueShader;
-  std::shared_ptr<Engine::VertexArray> m_SquareVA;
-
+  Engine::Ref<Engine::Shader> m_TriangleShader;
+  Engine::Ref<Engine::VertexArray> m_TriangleVA;
+  Engine::Ref<Engine::Shader> m_FlatColorShader;
+  Engine::Ref<Engine::Shader> m_TextureShader;
+  Engine::Ref<Engine::VertexArray> m_SquareVA;
+  Engine::Ref<Engine::Texture2D> m_Texture;
+  Engine::Ref<Engine::Texture2D> m_KirbyTexture;
   Engine::OrthographicCamera m_Camera;
   glm::vec3 m_CameraPosition;
   float m_CameraMoveSpeed = 5.0f;
   float m_CameraRotation = 0.0f;
   float m_CameraRotationSpeed = 180.0f;
+  glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
 
+// Pushes current layer onto the stack
 class Sandbox : public Engine::Application
 {
 public:
@@ -218,6 +296,7 @@ public:
   ~Sandbox() {}
 };
 
+// Creates the app
 Engine::Application* Engine::CreateApplication()
 {
   return new Sandbox();

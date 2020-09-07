@@ -44,7 +44,7 @@ namespace Engine
     glBindVertexArray(0);
   }
 
-  void Engine::OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
+  void Engine::OpenGLVertexArray::AddVertexBuffer(const Engine::Ref<VertexBuffer>& vertexBuffer)
   {
     // Check that the vertex buffer has a layout
     EN_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
@@ -54,23 +54,22 @@ namespace Engine
     vertexBuffer->Bind();
 
     // For each element in the layout, define its data
-    uint32_t index = 0;
     const auto& layout = vertexBuffer->GetLayout();
     for (const auto& element : layout)
     {
-      glEnableVertexAttribArray(index);
-      glVertexAttribPointer(index,
+      glEnableVertexAttribArray(m_VBIndex);
+      glVertexAttribPointer(m_VBIndex,
         element.GetComponentCount(),
         ShaderDataTypeToOpenGLBaseType(element._type),
         element._normalized ? GL_TRUE : GL_FALSE,
         layout.GetStride(),
-        (const void*)element._offset);
-      ++index;
+        (const void*)(uint64_t)element._offset);
+      ++m_VBIndex;
     }
     m_VertexBuffers.push_back(vertexBuffer);
   }
 
-  void Engine::OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
+  void Engine::OpenGLVertexArray::SetIndexBuffer(const Engine::Ref<IndexBuffer>& indexBuffer)
   {
     glBindVertexArray(m_RendererID);
     indexBuffer->Bind();

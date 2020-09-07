@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #ifdef EN_PLATFORM_WINDOWS
 // only build the DLL for import/export if Dynamic Linking is enabled
 // otherwise, define ENGINE_API as empty to link statically
@@ -30,4 +32,13 @@
 
 #define BIT(x) (1 << x)
 
-#define EN_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+//#define EN_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
+namespace Engine
+{
+  template<typename T>
+  using Scope = std::unique_ptr<T>;
+
+  template<typename T>
+  using Ref = std::shared_ptr<T>;
+}

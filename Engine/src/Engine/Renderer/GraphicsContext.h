@@ -1,5 +1,7 @@
 #pragma once
 
+// Base class for OpenGLContext
+
 namespace Engine
 {
   class GraphicsContext
