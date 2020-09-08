@@ -44,7 +44,17 @@ namespace Engine
       glfwSetErrorCallback(GLFWErrorCallback);
       s_GLFWInitialized = true;
     }
-    m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+    // Set GL Version 
+    // (This prevents an exception from being thrown on glGenerateVertexArrays)
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    m_Window = glfwCreateWindow((int)props.Width, 
+                                (int)props.Height, 
+                                m_Data.Title.c_str(), 
+                                nullptr, 
+                                nullptr);
     //glfwMakeContextCurrent(m_Window);
     //int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     //EN_CORE_ASSERT(status, "Failed to initialize Glad!");

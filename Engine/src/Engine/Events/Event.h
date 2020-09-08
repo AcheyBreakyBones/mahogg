@@ -56,17 +56,15 @@ namespace Engine
 
 	class EventDispatcher
 	{
-		template<typename T>
-		using EventFn = std::function<bool(T&)>;
 	public:
 		EventDispatcher(Event& event) : m_Event(event) {}
-		template<typename T>
-		bool Dispatch(EventFn<T> func)
+		template<typename T, typename F> // F will be deduced by the compiler 
+		bool Dispatch(const F& func)
 		{
 			if (m_Event.GetEventType() == T::GetStaticType())
 			{
 				//m_Event.m_Handled = func(*(T*)&m_Event);
-				m_Event.Handled = func(*(T*)&m_Event);
+				m_Event.Handled = func(static_cast<T&>(m_Event));
 				return true;
 			}
 			return false;
