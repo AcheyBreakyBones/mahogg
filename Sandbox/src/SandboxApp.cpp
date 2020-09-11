@@ -112,7 +112,7 @@ public:
 			}
 		)";
 
-    m_TriangleShader.reset(Engine::Shader::Create(vertexSrc, fragmentSrc));
+    m_TriangleShader = Engine::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
 
     // Square Grid
     std::string flatColorShaderVertexSrc = R"(
@@ -147,13 +147,15 @@ public:
 			}
 		)";
 
-    m_FlatColorShader.reset(Engine::Shader::Create(flatColorShaderVertexSrc, flatColorShaderFragmentSrc));
+    m_FlatColorShader = Engine::Shader::Create("FlatColor", 
+                        flatColorShaderVertexSrc, flatColorShaderFragmentSrc);
 
-    m_TextureShader.reset(Engine::Shader::Create("assets/shaders/Texture.glsl"));
+    auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
     //m_Texture = Engine::Texture2D::Create("assets/textures/Checkerboard.png");
     m_KirbyTexture = Engine::Texture2D::Create("assets/textures/Kirby.png");
-    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_TextureShader)->Bind();
-    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_TextureShader)->UploadUniformInt("u_Texture", 0);
+    std::dynamic_pointer_cast<Engine::OpenGLShader>(textureShader)->Bind();
+    std::dynamic_pointer_cast<Engine::OpenGLShader>(textureShader)->
+                              UploadUniformInt("u_Texture", 0);
   }
 
   // Inputs and Rendering are handled here
@@ -209,11 +211,12 @@ public:
         Engine::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
       }
     }
+    auto textureShader = m_ShaderLibrary.Get("Texture");
     //Engine::Renderer::Submit(m_Shader, m_VertexArray);
     //m_Texture->Bind();
-    //Engine::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+    //Engine::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
     m_KirbyTexture->Bind();
-    Engine::Renderer::Submit(m_TextureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+    Engine::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
     // CUT! (end scene)
     Engine::Renderer::EndScene();
@@ -237,11 +240,12 @@ private:
   Engine::Ref<Engine::Shader> m_TriangleShader;
   Engine::Ref<Engine::VertexArray> m_TriangleVA;
   Engine::Ref<Engine::Shader> m_FlatColorShader;
-  Engine::Ref<Engine::Shader> m_TextureShader;
+  //Engine::Ref<Engine::Shader> m_TextureShader;
   Engine::Ref<Engine::VertexArray> m_SquareVA;
   Engine::Ref<Engine::Texture2D> m_Texture;
   Engine::Ref<Engine::Texture2D> m_KirbyTexture;
   Engine::OrthographicCamera m_Camera;
+  Engine::ShaderLibrary m_ShaderLibrary;
   glm::vec3 m_CameraPosition;
   float m_CameraMoveSpeed = 5.0f;
   float m_CameraRotation = 0.0f;

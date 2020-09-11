@@ -25,9 +25,39 @@ namespace Engine
 		std::string source = ReadFile(path);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
+
+		// Extract name from filepath                    V
+		// Find the last slash of the path (i.e. "shaders/Texture.glsl")
+		size_t lastSlashPos = path.find_last_of("/\\");
+		if (lastSlashPos == std::string::npos)
+		{
+			// Reset
+			lastSlashPos = 0;
+		}
+		else
+		{
+			// Go past the slash
+			++lastSlashPos;
+		}
+
+		// Find the dot preceding the file extension
+		size_t lastDotPos = path.rfind('.');
+		size_t nameLength = 0;
+		if (lastDotPos == std::string::npos)
+		{
+			// Count the chars from the last slash
+			nameLength = path.size() - lastSlashPos;
+		}
+		else
+		{
+			// Count the chars between the slash and the dot
+			nameLength = lastDotPos - lastSlashPos;
+		}
+		m_Name = path.substr(lastSlashPos, nameLength);
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& vertexSrc, const std::string& fragmentSrc)
+	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+		: m_Name(name)
 	{
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
@@ -59,6 +89,8 @@ namespace Engine
 		return result;
 	}
 
+	// Deduces the shader type (vertex or fragment) 
+	// by reading the shader file for "#type"
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
 	{
 		std::unordered_map<GLenum, std::string> shaderSources;
@@ -87,7 +119,9 @@ namespace Engine
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
 		GLuint program = glCreateProgram();
-		std::vector<GLenum> glShaderIDs(shaderSources.size());
+		EN_CORE_ASSERT(shaderSources.size() <= 2, "No more than 2 shaders are allowed!")
+		std::array<GLenum, 2> glShaderIDs;
+		uint32_t glShaderIDIndex = 0;
 		for (auto& keyValue : shaderSources)
 		{
 			GLenum type = keyValue.first;
@@ -121,7 +155,7 @@ namespace Engine
 				break;
 			}
 			glAttachShader(program, shader);
-			glShaderIDs.push_back(shader);
+			glShaderIDs[glShaderIDIndex++] = shader;
 		}
 		m_RendererID = program;
 
