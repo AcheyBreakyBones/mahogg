@@ -1,5 +1,6 @@
 #include "enpch.h"
 #include "OpenGLShader.h"
+#include <filesystem>
 #include <fstream>
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -26,34 +27,9 @@ namespace Engine
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
 
-		// Extract name from filepath                    V
-		// Find the last slash of the path (i.e. "shaders/Texture.glsl")
-		size_t lastSlashPos = path.find_last_of("/\\");
-		if (lastSlashPos == std::string::npos)
-		{
-			// Reset
-			lastSlashPos = 0;
-		}
-		else
-		{
-			// Go past the slash
-			++lastSlashPos;
-		}
-
-		// Find the dot preceding the file extension
-		size_t lastDotPos = path.rfind('.');
-		size_t nameLength = 0;
-		if (lastDotPos == std::string::npos)
-		{
-			// Count the chars from the last slash
-			nameLength = path.size() - lastSlashPos;
-		}
-		else
-		{
-			// Count the chars between the slash and the dot
-			nameLength = lastDotPos - lastSlashPos;
-		}
-		m_Name = path.substr(lastSlashPos, nameLength);
+		// Extract name from filepath
+		std::filesystem::path FP = path;
+		m_Name = FP.stem().string();	// Returns the file's name stripped of the extension
 	}
 
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
@@ -120,11 +96,11 @@ namespace Engine
 	{
 		GLuint program = glCreateProgram();
 		EN_CORE_ASSERT(shaderSources.size() <= 2, "No more than 2 shaders are allowed!")
-		std::array<GLenum, 2> glShaderIDs;
+		std::array<GLuint, 2> glShaderIDs;
 		uint32_t glShaderIDIndex = 0;
 		for (auto& keyValue : shaderSources)
 		{
-			GLenum type = keyValue.first;
+			GLuint type = keyValue.first;
 			const std::string& source = keyValue.second;
 
 			// Create an empty shader handle

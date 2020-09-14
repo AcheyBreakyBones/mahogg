@@ -49,10 +49,13 @@ namespace Engine
       Timestep dt = time - m_LastFrameTime;
       m_LastFrameTime = time;
 
-      // Submit layers for rendering
-      for (Layer* layer : m_LayerStack)
+      // Submit layers for rendering if window is visible
+      if (!m_Minimized)
       {
-        layer->OnUpdate(dt);
+        for (Layer* layer : m_LayerStack)
+        {
+          layer->OnUpdate(dt);
+        }
       }
 
       // Commence rendering
@@ -77,15 +80,16 @@ namespace Engine
     m_LayerStack.PushOverlay(layer);
   }
 
-  void Application::OnEvent(Event& e)
+  void Application::OnEvent(Event& event)
   {
-    EventDispatcher dispatcher(e);
+    EventDispatcher dispatcher(event);
     dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
+    dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
     //EN_CORE_TRACE("{0}", e);
     for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
     {
-      (*--it)->OnEvent(e);
-      if (e.Handled)
+      (*--it)->OnEvent(event);
+      if (event.Handled)
       {
         break;
       }
@@ -96,5 +100,16 @@ namespace Engine
   {
     m_Running = false;
     return true;
+  }
+  bool Application::OnWindowResize(WindowResizeEvent& event)
+  {
+    if (event.GetWidth() == 0 || event.GetHeight() == 0)
+    {
+      m_Minimized = true;
+      return false;
+    }
+    m_Minimized = false;
+    Renderer::OnWindowResize(event.GetWidth(), event.GetHeight());
+    return false;
   }
 }

@@ -19,16 +19,18 @@ namespace Engine
 
     void Run();
 
-    void OnEvent(Event& e);
+    void OnEvent(Event& event);
     void PushLayer(Layer* layer);
     void PushOverlay(Layer* layer);
     inline Window& GetWindow() { return *m_Window; }
     inline static Application& Get() { return *s_Instance; }
   private:
-    bool OnWindowClose(WindowCloseEvent& e);
+    bool OnWindowClose(WindowCloseEvent& event);
+    bool OnWindowResize(WindowResizeEvent& event);
     Engine::Scope<Window> m_Window;
     ImGuiLayer* m_ImGuiLayer;
     bool m_Running = true;
+    bool m_Minimized = false;
     LayerStack m_LayerStack;
     float m_LastFrameTime = 0.0f;
   private:
