@@ -29,10 +29,12 @@ namespace Engine
 
 		// Extract name from filepath
 		std::filesystem::path FP = path;
-		m_Name = FP.stem().string();	// Returns the file's name stripped of the extension
+		// Returns the file's name stripped of the extension
+		m_Name = FP.stem().string();
 	}
 
-	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertexSrc, const std::string& fragmentSrc)
+	OpenGLShader::OpenGLShader(const std::string& name, const std::string& 
+		vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
 		std::unordered_map<GLenum, std::string> sources;
@@ -67,26 +69,49 @@ namespace Engine
 
 	// Deduces the shader type (vertex or fragment) 
 	// by reading the shader file for "#type"
-	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(const std::string& source)
+	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(
+		const std::string& source)
 	{
 		std::unordered_map<GLenum, std::string> shaderSources;
 		const char* typeToken = "#type";
 		size_t typeTokenLength = strlen(typeToken);
-		size_t pos = source.find(typeToken, 0);
-		while (pos != std::string::npos)
+		// Start of shader type declaration line
+		size_t typePos = source.find(typeToken, 0);
+		while (typePos != std::string::npos)
 		{
-			size_t EOL = source.find_first_of("\r\n", pos);
+			// End of shader type declaration line
+			size_t EOL = source.find_first_of("\r\n", typePos);	
 			EN_CORE_ASSERT(EOL != std::string::npos, "Syntax Error");
 
 			// Move to the character after typeToken
-			size_t begin = pos + typeTokenLength + 1;
+			// Start of shader type name (after "#type " keyword)
+			size_t begin = typePos + typeTokenLength + 1;
 			std::string type = source.substr(begin, EOL - begin);
 			EN_CORE_ASSERT(ShaderTypeFromString(type), "Invalid shader type specified");
 
-			size_t nextLinePos = source.find_first_not_of("\r\n", EOL);
-			pos = source.find(typeToken, nextLinePos);
+			// Start of shader code after shader type declaration line
+			size_t codePos = source.find_first_not_of("\r\n", EOL);
+			EN_CORE_ASSERT(codePos != std::string::npos, "Syntax Error");
+			// Start of next shader type declaration line
+			typePos = source.find(typeToken, codePos);
+
+			// If there are no more shader types to read, then read the current
+			// shader code into its designated type index
+			if (typePos == std::string::npos)
+			{
+				shaderSources[ShaderTypeFromString(type)] = source.substr(codePos);
+			}
+			// If there is another shader type following the current one, then only
+			// read the shader code that goes up to that line
+			else
+			{
+				shaderSources[ShaderTypeFromString(type)] = source.substr(codePos,
+					typePos - codePos);
+			}
+			/*
 			shaderSources[ShaderTypeFromString(type)] = source.substr(nextLinePos, pos - 
 				(nextLinePos == std::string::npos ? source.size() - 1 : nextLinePos));
+			*/
 		}
 
 		return shaderSources;
@@ -164,10 +189,11 @@ namespace Engine
 			return;
 		}
 
-		// Always detach shaders after a successful link.
+		// Always detach and delete shaders after a successful link.
 		for (auto id : glShaderIDs)
 		{
 			glDetachShader(program, id);
+			glDeleteShader(id);
 		}
   }
 

@@ -58,7 +58,7 @@ namespace Engine
     //glfwMakeContextCurrent(m_Window);
     //int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     //EN_CORE_ASSERT(status, "Failed to initialize Glad!");
-    m_Context = new OpenGLContext(m_Window);
+    m_Context = CreateScope<OpenGLContext>(m_Window);
     m_Context->Init();
     glfwSetWindowUserPointer(m_Window, &m_Data);
     SetVSync(true);

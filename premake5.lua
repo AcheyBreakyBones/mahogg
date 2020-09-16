@@ -80,7 +80,6 @@ project "Engine"
     
     defines
     {
-        "EN_PLATFORM_WINDOWS",
         "EN_BUILD_DLL",
         "GLFW_INCLUDE_NONE"
     }
@@ -131,11 +130,6 @@ project "Sandbox"
   
   filter "system:windows"
     systemversion "latest"
-    
-  defines
-    {
-        "EN_PLATFORM_WINDOWS"
-    }
     
     filter "configurations:Debug"
       defines "EN_DEBUG"

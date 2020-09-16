@@ -10,8 +10,10 @@ namespace Engine
 
   LayerStack::~LayerStack()
   {
+    // Detach and then delete
     for (Layer* layer : m_Layers)
     {
+      layer->OnDetach();
       delete layer;
     }
   }
