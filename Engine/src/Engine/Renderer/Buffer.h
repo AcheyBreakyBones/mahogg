@@ -38,7 +38,7 @@ namespace Engine
     uint32_t _size;
     uint32_t _offset;
     bool _normalized;
-    //BufferElement() {}
+    //BufferElement() = default;
     BufferElement(ShaderDataType type, const std::string& name, bool normalized = false)
       : _name(name), _type(type), _size(ShaderDataTypeSize(type)), _offset(0), _normalized(normalized) {}
     uint32_t GetComponentCount() const

@@ -8,7 +8,8 @@
 
 namespace Engine
 {
-  static bool s_GLFWInitialized = false;
+  //static bool s_GLFWInitialized = false;
+  static uint8_t s_GLFWWindowCount = 0;
 
   static void GLFWErrorCallback(int error, const char* description)
   {
@@ -36,13 +37,14 @@ namespace Engine
     m_Data.Width = props.Width;
     m_Data.Height = props.Height;
     EN_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
-    if (!s_GLFWInitialized)
+    //if (!s_GLFWInitialized)
+    if (!s_GLFWWindowCount)
     {
-      // TODO: glfwTerminate on system shutdown
+      EN_CORE_INFO("Initializing GLFW");
       int success = glfwInit();
       EN_CORE_ASSERT(success, "Could not initialize GLFW!");
       glfwSetErrorCallback(GLFWErrorCallback);
-      s_GLFWInitialized = true;
+      //s_GLFWInitialized = true;
     }
     // Set GL Version 
     // (This prevents an exception from being thrown on glGenerateVertexArrays)
@@ -55,6 +57,7 @@ namespace Engine
                                 m_Data.Title.c_str(), 
                                 nullptr, 
                                 nullptr);
+    ++s_GLFWWindowCount;
     //glfwMakeContextCurrent(m_Window);
     //int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     //EN_CORE_ASSERT(status, "Failed to initialize Glad!");
@@ -151,6 +154,12 @@ namespace Engine
   void WindowsWindow::Shutdown()
   {
     glfwDestroyWindow(m_Window);
+    --s_GLFWWindowCount;
+    if (s_GLFWWindowCount == 0)
+    {
+      EN_CORE_INFO("Terminating GLFW");
+      glfwTerminate();
+    }
   }
 
   void WindowsWindow::OnUpdate()

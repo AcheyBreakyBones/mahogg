@@ -1,8 +1,10 @@
 #include <Engine.h>
+#include <Engine/Core/EntryPoint.h>
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "imgui/imgui.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "Sandbox2D.h"
 
 // This is where the Vertex Arrays and Shaders are defined
 class ExampleLayer : public Engine::Layer
@@ -12,7 +14,7 @@ public:
     : Layer("Example"), m_CameraController(1920.0f / 1080.0f, true) // delete "true" to disable rotation
   {
     // Vertex Array
-    m_TriangleVA.reset(Engine::VertexArray::Create());
+    m_TriangleVA = Engine::VertexArray::Create();
 
     // Vertex Buffer (x, y, z, R, G, B, A)
     float vertices[3 * 7] =
@@ -48,7 +50,7 @@ public:
       m_TriangleVA->SetIndexBuffer(indexBuffer);
 
       // Now this VA is complete
-      m_SquareVA.reset(Engine::VertexArray::Create());
+      m_SquareVA = Engine::VertexArray::Create();
 
       // Vertex Buffer (x, y, z, U, V)
       // U and V are Texture Coordinates
@@ -227,8 +229,9 @@ class Sandbox : public Engine::Application
 public:
   Sandbox() 
   { 
-    PushLayer(new ExampleLayer());
     //PushOverlay(new Engine::ImGuiLayer());
+    //PushLayer(new ExampleLayer());
+    PushLayer(new Sandbox2D());
   }
 
   ~Sandbox() {}

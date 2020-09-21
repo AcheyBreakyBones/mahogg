@@ -63,7 +63,7 @@ namespace Engine
         ShaderDataTypeToOpenGLBaseType(element._type),
         element._normalized ? GL_TRUE : GL_FALSE,
         layout.GetStride(),
-        (const void*)(uint64_t)element._offset);
+        (const void*)(intptr_t)element._offset);
       ++m_VBIndex;
     }
     m_VertexBuffers.push_back(vertexBuffer);
