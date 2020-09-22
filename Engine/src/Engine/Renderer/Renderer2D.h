@@ -1,7 +1,7 @@
 #pragma once
 
-#include "OrthographicCamera.h"
-#include "Texture.h"
+#include "Engine/Renderer/OrthographicCamera.h"
+#include "Engine/Renderer/Texture.h"
 
 namespace Engine
 {
@@ -15,14 +15,14 @@ namespace Engine
 
     // Primitives
       // vec2 position
-    static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
+    static void DrawQuadColor2(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color);
     // vec3 position
-    static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
+    static void DrawQuadColor3(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
 
     // Textures
       // vec2 position
-    static void DrawQuad(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture);
+    static void DrawQuadTex2(const glm::vec2& position, const glm::vec2& size, const Ref<Texture2D>& texture);
     // vec3 position
-    static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture);
+    static void DrawQuadTex3(const glm::vec3& position, const glm::vec2& size, const Ref<Texture2D>& texture);
   };
 }

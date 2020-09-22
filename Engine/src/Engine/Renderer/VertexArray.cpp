@@ -1,6 +1,6 @@
 #include "enpch.h"
-#include "VertexArray.h"
-#include "Renderer.h"
+#include "Engine/Renderer/VertexArray.h"
+#include "Engine/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLVertexArray.h"
 
 namespace Engine
@@ -10,7 +10,7 @@ namespace Engine
     switch (Renderer::GetAPI())
     {
     case RendererAPI::API::NONE:   EN_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported!"); return nullptr;
-    case RendererAPI::API::OpenGL: return std::make_shared<OpenGLVertexArray>();
+    case RendererAPI::API::OpenGL: return CreateRef<OpenGLVertexArray>();
     }
 
     EN_CORE_ASSERT(false, "Unknown RendererAPI!");

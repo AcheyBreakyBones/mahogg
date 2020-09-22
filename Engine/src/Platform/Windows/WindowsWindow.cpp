@@ -1,5 +1,5 @@
 #include "enpch.h"
-#include "WindowsWindow.h"
+#include "Platform/Windows/WindowsWindow.h"
 #include "Engine/Events/ApplicationEvent.h"
 #include "Engine/Events/KeyEvent.h"
 #include "Engine/Events/MouseEvent.h"
@@ -16,9 +16,9 @@ namespace Engine
     EN_CORE_ERROR("GLFW Error ({0}): {1}", error, description);
   }
 
-  Window* Window::Create(const WindowProps& props)
+  Scope<Window> Window::Create(const WindowProps& props)
   {
-    return new WindowsWindow(props);
+    return CreateScope<WindowsWindow>(props);
   }
 
   WindowsWindow::WindowsWindow(const WindowProps& props)
@@ -37,10 +37,9 @@ namespace Engine
     m_Data.Width = props.Width;
     m_Data.Height = props.Height;
     EN_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
-    //if (!s_GLFWInitialized)
     if (!s_GLFWWindowCount)
     {
-      EN_CORE_INFO("Initializing GLFW");
+      //EN_CORE_INFO("Initializing GLFW");
       int success = glfwInit();
       EN_CORE_ASSERT(success, "Could not initialize GLFW!");
       glfwSetErrorCallback(GLFWErrorCallback);
@@ -61,7 +60,7 @@ namespace Engine
     //glfwMakeContextCurrent(m_Window);
     //int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     //EN_CORE_ASSERT(status, "Failed to initialize Glad!");
-    m_Context = CreateScope<OpenGLContext>(m_Window);
+    m_Context = GraphicsContext::Create(m_Window);
     m_Context->Init();
     glfwSetWindowUserPointer(m_Window, &m_Data);
     SetVSync(true);
@@ -157,7 +156,7 @@ namespace Engine
     --s_GLFWWindowCount;
     if (s_GLFWWindowCount == 0)
     {
-      EN_CORE_INFO("Terminating GLFW");
+      //EN_CORE_INFO("Terminating GLFW");
       glfwTerminate();
     }
   }

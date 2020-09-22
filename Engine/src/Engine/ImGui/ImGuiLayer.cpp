@@ -1,9 +1,8 @@
 #include "enpch.h"
-#include "ImGuiLayer.h"
-#include "imgui.h"
-//#include "Platform/OpenGL/ImGuiOpenGLRenderer.h"
-#include "examples/imgui_impl_glfw.h"
-#include "examples/imgui_impl_opengl3.h"
+#include "Engine/ImGui/ImGuiLayer.h"
+#include <imgui.h>
+#include <examples/imgui_impl_glfw.h>
+#include <examples/imgui_impl_opengl3.h>
 #include "Engine/Core/Application.h"
 
 // TEMPORARY

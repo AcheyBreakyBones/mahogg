@@ -1,13 +1,8 @@
 #include "enpch.h"
-#include "LayerStack.h"
+#include "Engine/Core/LayerStack.h"
 
 namespace Engine
 {
-  LayerStack::LayerStack() 
-  {
-    //m_LayerInsert = m_Layers.begin();
-  }
-
   LayerStack::~LayerStack()
   {
     // Detach and then delete

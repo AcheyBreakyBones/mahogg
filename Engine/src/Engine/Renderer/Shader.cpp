@@ -1,6 +1,6 @@
 #include "enpch.h"
-#include "Shader.h"
-#include "Renderer.h"
+#include "Engine/Renderer/Shader.h"
+#include "Engine/Renderer/Renderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 
 namespace Engine
@@ -10,7 +10,7 @@ namespace Engine
     switch (Renderer::GetAPI())
     {
     case RendererAPI::API::NONE:   EN_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported!"); return nullptr;
-    case RendererAPI::API::OpenGL: return std::make_shared<OpenGLShader>(path);
+    case RendererAPI::API::OpenGL: return CreateRef<OpenGLShader>(path);
     }
 
     EN_CORE_ASSERT(false, "Unknown RendererAPI!");
@@ -22,7 +22,7 @@ namespace Engine
     switch (Renderer::GetAPI())
     {
     case RendererAPI::API::NONE:    EN_CORE_ASSERT(false, "RendererAPI::NONE is currently not supported!"); return nullptr;
-    case RendererAPI::API::OpenGL:  return std::make_shared<OpenGLShader>(name, vertexSrc, fragmentSrc);
+    case RendererAPI::API::OpenGL:  return CreateRef<OpenGLShader>(name, vertexSrc, fragmentSrc);
     }
     EN_CORE_ASSERT(false, "Unknown RendererAPI!");
     return nullptr;

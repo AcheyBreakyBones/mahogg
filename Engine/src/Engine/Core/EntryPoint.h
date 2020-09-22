@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/Core/Core.h"
 
 #ifdef EN_PLATFORM_WINDOWS
 

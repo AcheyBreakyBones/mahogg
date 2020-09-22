@@ -1,5 +1,5 @@
 #include "enpch.h"
-#include "OpenGLVertexArray.h"
+#include "Platform/OpenGL/OpenGLVertexArray.h"
 #include <glad/glad.h>
 
 namespace Engine
@@ -8,17 +8,17 @@ namespace Engine
   {
     switch (type)
     {
-    case Engine::ShaderDataType::Float:   return GL_FLOAT;
-    case Engine::ShaderDataType::Float2:  return GL_FLOAT;
-    case Engine::ShaderDataType::Float3:  return GL_FLOAT;
-    case Engine::ShaderDataType::Float4:  return GL_FLOAT;
-    case Engine::ShaderDataType::Mat3:    return GL_FLOAT;
-    case Engine::ShaderDataType::Mat4:    return GL_FLOAT;
-    case Engine::ShaderDataType::Int:     return GL_INT;
-    case Engine::ShaderDataType::Int2:    return GL_INT;
-    case Engine::ShaderDataType::Int3:    return GL_INT;
-    case Engine::ShaderDataType::Int4:    return GL_INT;
-    case Engine::ShaderDataType::Bool:    return GL_BOOL;
+    case ShaderDataType::Float:   return GL_FLOAT;
+    case ShaderDataType::Float2:  return GL_FLOAT;
+    case ShaderDataType::Float3:  return GL_FLOAT;
+    case ShaderDataType::Float4:  return GL_FLOAT;
+    case ShaderDataType::Mat3:    return GL_FLOAT;
+    case ShaderDataType::Mat4:    return GL_FLOAT;
+    case ShaderDataType::Int:     return GL_INT;
+    case ShaderDataType::Int2:    return GL_INT;
+    case ShaderDataType::Int3:    return GL_INT;
+    case ShaderDataType::Int4:    return GL_INT;
+    case ShaderDataType::Bool:    return GL_BOOL;
     }
     EN_CORE_ASSERT(false, "Unknown Shader DataType!");
     return 0;
@@ -44,7 +44,7 @@ namespace Engine
     glBindVertexArray(0);
   }
 
-  void Engine::OpenGLVertexArray::AddVertexBuffer(const Engine::Ref<VertexBuffer>& vertexBuffer)
+  void Engine::OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
   {
     // Check that the vertex buffer has a layout
     EN_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "Vertex Buffer has no layout!");
@@ -69,7 +69,7 @@ namespace Engine
     m_VertexBuffers.push_back(vertexBuffer);
   }
 
-  void Engine::OpenGLVertexArray::SetIndexBuffer(const Engine::Ref<IndexBuffer>& indexBuffer)
+  void Engine::OpenGLVertexArray::SetIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
   {
     glBindVertexArray(m_RendererID);
     indexBuffer->Bind();

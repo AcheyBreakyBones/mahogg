@@ -1,7 +1,6 @@
 #include <Engine.h>
 #include <Engine/Core/EntryPoint.h>
-#include "Platform/OpenGL/OpenGLShader.h"
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Sandbox2D.h"
@@ -25,8 +24,7 @@ public:
     };
 
     // Store vertices in vertex buffer
-    Engine::Ref<Engine::VertexBuffer> vertexBuffer;
-    vertexBuffer.reset(Engine::VertexBuffer::Create(vertices, sizeof(vertices)));
+    Engine::Ref<Engine::VertexBuffer> vertexBuffer = Engine::VertexBuffer::Create(vertices, sizeof(vertices));
 
     // Layout and Index Buffer contained in this scope
     // (don't need them anymore once they get stored in vertex array)
@@ -45,8 +43,7 @@ public:
 
       // Index Buffer (aka: the order in which vertices are drawn)
       uint32_t indices[3] = { 0, 1, 2 };
-      Engine::Ref<Engine::IndexBuffer> indexBuffer;
-      indexBuffer.reset(Engine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+      Engine::Ref<Engine::IndexBuffer> indexBuffer = Engine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
       m_TriangleVA->SetIndexBuffer(indexBuffer);
 
       // Now this VA is complete
@@ -62,8 +59,7 @@ public:
       };
 
       // Set layout and add VB to VA
-      Engine::Ref<Engine::VertexBuffer> squareVB;
-      squareVB.reset(Engine::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+      Engine::Ref<Engine::VertexBuffer> squareVB = Engine::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
       squareVB->SetLayout({
         { Engine::ShaderDataType::Float3, "a_Position" },
         { Engine::ShaderDataType::Float2, "a_TexCoord" }
@@ -72,8 +68,7 @@ public:
 
       // Index Buffer
       uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-      Engine::Ref<Engine::IndexBuffer> squareIB;
-      squareIB.reset(Engine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+      Engine::Ref<Engine::IndexBuffer> squareIB = Engine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
       m_SquareVA->SetIndexBuffer(squareIB);
     }
 
@@ -155,9 +150,8 @@ public:
     auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
     //m_Texture = Engine::Texture2D::Create("assets/textures/Checkerboard.png");
     m_KirbyTexture = Engine::Texture2D::Create("assets/textures/Kirby.png");
-    std::dynamic_pointer_cast<Engine::OpenGLShader>(textureShader)->Bind();
-    std::dynamic_pointer_cast<Engine::OpenGLShader>(textureShader)->
-                              UploadUniformInt("u_Texture", 0);
+    textureShader->Bind();
+    textureShader->SetInt("u_Texture", 0);
   }
 
   // Inputs and Rendering are handled here
@@ -173,8 +167,8 @@ public:
     // ACTION! (begin scene)
     Engine::Renderer::BeginScene(m_CameraController.GetCamera());
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_FlatColorShader)->Bind();
-    std::dynamic_pointer_cast<Engine::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+    m_FlatColorShader->Bind();
+    m_FlatColorShader->SetFloat3("u_Color", m_SquareColor);
 
     for (int y = 0; y < 20; ++y)
     {

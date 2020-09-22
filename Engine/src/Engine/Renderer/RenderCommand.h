@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RendererAPI.h"
+#include "Engine/Renderer/RendererAPI.h"
 
 namespace Engine
 {
@@ -27,7 +27,7 @@ namespace Engine
       s_RendererAPI->Clear();
     }
 
-    inline static void DrawIndexed(const Engine::Ref<VertexArray>& vertexArray)
+    inline static void DrawIndexed(const Ref<VertexArray>& vertexArray)
     {
       s_RendererAPI->DrawIndexed(vertexArray);
     }

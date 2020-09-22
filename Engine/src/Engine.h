@@ -1,7 +1,7 @@
 #pragma once
 
 // For use by Engine applications
-//#include <stdio.h>
+#include "Engine/Core/Core.h"
 #include "Engine/Core/Application.h"
 #include "Engine/Core/Layer.h"
 #include "Engine/Core/Log.h"

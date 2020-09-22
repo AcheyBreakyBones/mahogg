@@ -1,16 +1,13 @@
 #pragma once
 
-#include "Core.h"
-#include "spdlog/spdlog.h"
-#include "spdlog/fmt/ostr.h"
+#include "Engine/Core/Core.h"
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
 
 namespace Engine
 {
   class ENGINE_API Log
   {
-  private:
-    static std::shared_ptr<spdlog::logger> s_CoreLogger;
-    static std::shared_ptr<spdlog::logger> s_ClientLogger;
   public:
     static void Init();
     inline static std::shared_ptr<spdlog::logger>& GetCoreLogger() 
@@ -21,6 +18,9 @@ namespace Engine
     {
       return s_ClientLogger;
     }
+  private:
+    static std::shared_ptr<spdlog::logger> s_CoreLogger;
+    static std::shared_ptr<spdlog::logger> s_ClientLogger;
   };
 }
 

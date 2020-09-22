@@ -1,14 +1,12 @@
 #include "enpch.h"
-#include "Application.h"
-//#include "Engine/Events/ApplicationEvent.h"
+#include "Engine/Core/Application.h"
 #include "Engine/Core/Log.h"
 #include <GLFW/glfw3.h>
 #include "Engine/Renderer/Renderer.h"
-#include "Input.h"
+#include "Engine/Core/Input.h"
 
 namespace Engine
 {
-#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
   Application* Application::s_Instance = nullptr;
 
   // TODO: Defaut ctor for OrthographicCamera???
@@ -17,8 +15,8 @@ namespace Engine
     // Create Window
     EN_CORE_ASSERT(!s_Instance, "Application already exists!");
     s_Instance = this;
-    m_Window = Engine::Scope<Window>(Window::Create());
-    m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+    m_Window = Window::Create();
+    m_Window->SetEventCallback(EN_BIND_EVENT_FN(Application::OnEvent));
     Renderer::Init();
     m_ImGuiLayer = new ImGuiLayer();
     PushOverlay(m_ImGuiLayer);
@@ -26,6 +24,7 @@ namespace Engine
 
   Application::~Application()
   {
+    Renderer::Shutdown();
   }
 
   void Application::Run()
@@ -83,8 +82,8 @@ namespace Engine
   void Application::OnEvent(Event& event)
   {
     EventDispatcher dispatcher(event);
-    dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(Application::OnWindowClose));
-    dispatcher.Dispatch<WindowResizeEvent>(BIND_EVENT_FN(Application::OnWindowResize));
+    dispatcher.Dispatch<WindowCloseEvent>(EN_BIND_EVENT_FN(Application::OnWindowClose));
+    dispatcher.Dispatch<WindowResizeEvent>(EN_BIND_EVENT_FN(Application::OnWindowResize));
     //EN_CORE_TRACE("{0}", e);
     for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
     {
