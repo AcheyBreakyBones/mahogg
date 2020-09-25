@@ -23,22 +23,29 @@ namespace Engine
 
   WindowsWindow::WindowsWindow(const WindowProps& props)
   {
+    EN_PROFILE_FUNCTION();
+
     Init(props);
   }
 
   WindowsWindow::~WindowsWindow()
   {
+    EN_PROFILE_FUNCTION();
+
     Shutdown();
   }
 
   void WindowsWindow::Init(const WindowProps& props)
   {
+    EN_PROFILE_FUNCTION();
+
     m_Data.Title = props.Title;
     m_Data.Width = props.Width;
     m_Data.Height = props.Height;
     EN_CORE_INFO("Creating window {0} ({1}, {2})", props.Title, props.Width, props.Height);
     if (!s_GLFWWindowCount)
     {
+      EN_PROFILE_SCOPE("glfwInit()");
       //EN_CORE_INFO("Initializing GLFW");
       int success = glfwInit();
       EN_CORE_ASSERT(success, "Could not initialize GLFW!");
@@ -51,12 +58,11 @@ namespace Engine
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_Window = glfwCreateWindow((int)props.Width, 
-                                (int)props.Height, 
-                                m_Data.Title.c_str(), 
-                                nullptr, 
-                                nullptr);
-    ++s_GLFWWindowCount;
+    {
+      EN_PROFILE_SCOPE("glfwCreateWindow");
+      m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+      ++s_GLFWWindowCount;
+    }
     //glfwMakeContextCurrent(m_Window);
     //int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
     //EN_CORE_ASSERT(status, "Failed to initialize Glad!");
@@ -152,6 +158,8 @@ namespace Engine
 
   void WindowsWindow::Shutdown()
   {
+    EN_PROFILE_FUNCTION();
+
     glfwDestroyWindow(m_Window);
     --s_GLFWWindowCount;
     if (s_GLFWWindowCount == 0)
@@ -163,6 +171,8 @@ namespace Engine
 
   void WindowsWindow::OnUpdate()
   {
+    EN_PROFILE_FUNCTION();
+
     glfwPollEvents();
     //glfwSwapBuffers(m_Window);
     m_Context->SwapBuffers();
@@ -170,6 +180,8 @@ namespace Engine
 
   void WindowsWindow::SetVSync(bool enabled)
   {
+    EN_PROFILE_FUNCTION();
+
     if (enabled)
     {
       glfwSwapInterval(1);

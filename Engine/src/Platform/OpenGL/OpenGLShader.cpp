@@ -23,6 +23,8 @@ namespace Engine
 		
 	OpenGLShader::OpenGLShader(const std::string& path)
 	{
+		EN_PROFILE_FUNCTION();
+
 		std::string source = ReadFile(path);
 		auto shaderSources = PreProcess(source);
 		Compile(shaderSources);
@@ -37,6 +39,8 @@ namespace Engine
 		vertexSrc, const std::string& fragmentSrc)
 		: m_Name(name)
 	{
+		EN_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> sources;
 		sources[GL_VERTEX_SHADER] = vertexSrc;
 		sources[GL_FRAGMENT_SHADER] = fragmentSrc;
@@ -45,20 +49,32 @@ namespace Engine
 
 	OpenGLShader::~OpenGLShader()
 	{
+		EN_PROFILE_FUNCTION();
+
 		glDeleteProgram(m_RendererID);
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& path)
 	{
+		EN_PROFILE_FUNCTION();
+
 		std::string result;
 		std::ifstream in(path, std::ios::in | std::ios::binary);
 		if (in)
 		{
 			in.seekg(0, std::ios::end);
-			result.resize(in.tellg());
-			in.seekg(0, std::ios::beg);
-			in.read(&result[0], result.size());
-			in.close();
+			size_t size = in.tellg();
+			if (size != -1)
+			{
+				result.resize(size);
+				in.seekg(0, std::ios::beg);
+				in.read(&result[0], size);
+				in.close();
+			}
+			else
+			{
+				EN_CORE_ERROR("Could not read from file '{0}'", path);
+			}
 		}
 		else
 		{
@@ -72,6 +88,8 @@ namespace Engine
 	std::unordered_map<GLenum, std::string> OpenGLShader::PreProcess(
 		const std::string& source)
 	{
+		EN_PROFILE_FUNCTION();
+
 		std::unordered_map<GLenum, std::string> shaderSources;
 		const char* typeToken = "#type";
 		size_t typeTokenLength = strlen(typeToken);
@@ -119,6 +137,8 @@ namespace Engine
 
 	void OpenGLShader::Compile(const std::unordered_map<GLenum, std::string>& shaderSources)
 	{
+		EN_PROFILE_FUNCTION();
+
 		GLuint program = glCreateProgram();
 		EN_CORE_ASSERT(shaderSources.size() <= 2, "No more than 2 shaders are allowed!")
 		std::array<GLuint, 2> glShaderIDs;
@@ -199,31 +219,43 @@ namespace Engine
 
   void OpenGLShader::Bind() const
   {
+		EN_PROFILE_FUNCTION();
+
 		glUseProgram(m_RendererID);
   }
 
   void OpenGLShader::Unbind() const
   {
+		EN_PROFILE_FUNCTION();
+
 		glUseProgram(0);
   }
 
 	void OpenGLShader::SetInt(const std::string& name, int val)
 	{
+		EN_PROFILE_FUNCTION();
+
 		UploadUniformInt(name, val);
 	}
 
 	void OpenGLShader::SetFloat3(const std::string& name, const glm::vec3& val)
 	{
+		EN_PROFILE_FUNCTION();
+
 		UploadUniformFloat3(name, val);
 	}
 
 	void OpenGLShader::SetFloat4(const std::string& name, const glm::vec4& val)
 	{
+		EN_PROFILE_FUNCTION();
+
 		UploadUniformFloat4(name, val);
 	}
 
 	void OpenGLShader::SetMat4(const std::string& name, const glm::mat4& val)
 	{
+		EN_PROFILE_FUNCTION();
+
 		UploadUniformMat4(name, val);
 	}
 

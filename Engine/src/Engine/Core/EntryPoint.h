@@ -9,11 +9,17 @@ int main(int argc, char** argv)
 {
   //printf("MaHOG Engine\n");
   Engine::Log::Init();
-  EN_CORE_WARN("Initialized Log!");
-  int a = 5;
-  EN_INFO("Hello! Var={0}", a);
+
+  EN_PROFILE_BEGIN_SESSION("Initialization", "EngineProfile-Init.json");
   auto app = Engine::CreateApplication();
+  EN_PROFILE_END_SESSION();
+
+  EN_PROFILE_BEGIN_SESSION("Update", "EngineProfile-Update.json");
   app->Run();
+  EN_PROFILE_END_SESSION();
+
+  EN_PROFILE_BEGIN_SESSION("Exit", "EngineProfile-Exit.json");
   delete app;
+  EN_PROFILE_END_SESSION();
 }
 #endif

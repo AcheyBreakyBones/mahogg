@@ -8,6 +8,8 @@ namespace Engine
   OpenGLTexture2D::OpenGLTexture2D(uint32_t width, uint32_t height)
     : m_Width(width), m_Height(height)
   {
+    EN_PROFILE_FUNCTION();
+
     m_InternalFormat = GL_RGBA8;
     m_DataFormat = GL_RGBA;
 
@@ -23,10 +25,16 @@ namespace Engine
   OpenGLTexture2D::OpenGLTexture2D(const std::string& path)
     : m_Path(path)
   {
+    EN_PROFILE_FUNCTION();
+
     int width = 0, height = 0, channels = 0;
     // Textures are imported upside-down by default
     stbi_set_flip_vertically_on_load(1);
-    stbi_uc* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    stbi_uc* data = nullptr;
+    {
+      EN_PROFILE_SCOPE("stbi_load - OpenGLTexture2D::OpenGLTexture2D(const std::string&)");
+      data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    }
     EN_CORE_ASSERT(data, "Failed to load image!");
     m_Width = width;
     m_Height = height;
@@ -61,11 +69,15 @@ namespace Engine
 
   OpenGLTexture2D::~OpenGLTexture2D()
   {
+    EN_PROFILE_FUNCTION();
+
     glDeleteTextures(1, &m_RendererID);
   }
 
   void OpenGLTexture2D::SetData(void* data, uint32_t size)
   {
+    EN_PROFILE_FUNCTION();
+
     uint32_t numBytes = 0;
     if (m_DataFormat == GL_RGBA)
     {
@@ -81,6 +93,8 @@ namespace Engine
 
   void OpenGLTexture2D::Bind(uint32_t slot) const
   {
+    EN_PROFILE_FUNCTION();
+
     glBindTextureUnit(slot, m_RendererID);
   }
 }

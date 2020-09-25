@@ -17,6 +17,8 @@ namespace Engine
   // This is taken from the code in ImGui's main.cpp
   void ImGuiLayer::OnAttach()
   {
+    EN_PROFILE_FUNCTION();
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -76,6 +78,8 @@ namespace Engine
 
   void ImGuiLayer::OnDetach()
   {
+    EN_PROFILE_FUNCTION();
+
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -83,6 +87,8 @@ namespace Engine
 
   void ImGuiLayer::Begin()
   {
+    EN_PROFILE_FUNCTION();
+
     //ImGuiIO& io = ImGui::GetIO();
     //Application& app = Application::Get();
     //io.DisplaySize = ImVec2(app.GetWindow().GetWidth(), app.GetWindow().GetHeight());
@@ -159,6 +165,8 @@ namespace Engine
   */
   void ImGuiLayer::End()
   {
+    EN_PROFILE_FUNCTION();
+
     ImGuiIO& io = ImGui::GetIO();
     //io.KeysDown[e.GetKeyCode()] = false;
     //
@@ -184,15 +192,5 @@ namespace Engine
       ImGui::RenderPlatformWindowsDefault();
       glfwMakeContextCurrent(backup_current_context);
     }
-  }
-  void ImGuiLayer::OnImGuiRender()
-  {
-    static bool show = true;
-    ImGui::ShowDemoWindow(&show);
-    //ImGuiIO& io = ImGui::GetIO();
-    //io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
-    //glViewport(0, 0, e.GetWidth(), e.GetHeight());
-
-    //return false;
   }
 }

@@ -16,6 +16,8 @@ namespace Engine
 
   void OrthographicCameraController::OnUpdate(Timestep dt)
   {
+    EN_PROFILE_FUNCTION();
+
     if (Input::IsKeyPressed((int)PrintableKeys::EN_KEY_A))
     {
       m_CameraPosition.x -= m_CameraTranslationSpeed * dt;
@@ -53,6 +55,8 @@ namespace Engine
   // Scrolling the mouse wheel will resize the window
   void OrthographicCameraController::OnEvent(Event& event)
   {
+    EN_PROFILE_FUNCTION();
+
     EventDispatcher dispatcher(event);
     dispatcher.Dispatch<MouseScrolledEvent>(EN_BIND_EVENT_FN(OrthographicCameraController::OnMouseScrolled));
     dispatcher.Dispatch<WindowResizeEvent>(EN_BIND_EVENT_FN(OrthographicCameraController::OnWindowResized));
@@ -60,6 +64,8 @@ namespace Engine
 
   bool OrthographicCameraController::OnMouseScrolled(MouseScrolledEvent& event)
   {
+    EN_PROFILE_FUNCTION();
+
     m_Zoom -= event.GetYOffset() * 0.25f;
     m_Zoom = std::max(m_Zoom, 0.25f);
     m_Camera.SetProjection(-m_AspectRatio * m_Zoom, m_AspectRatio * m_Zoom, -m_Zoom, m_Zoom);
@@ -68,6 +74,8 @@ namespace Engine
 
   bool OrthographicCameraController::OnWindowResized(WindowResizeEvent& event)
   {
+    EN_PROFILE_FUNCTION();
+
     m_AspectRatio = (float)event.GetWidth() / (float)event.GetHeight();
     m_Camera.SetProjection(-m_AspectRatio * m_Zoom, m_AspectRatio * m_Zoom, -m_Zoom, m_Zoom);
     return false;

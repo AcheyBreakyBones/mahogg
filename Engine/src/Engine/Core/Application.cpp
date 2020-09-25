@@ -12,6 +12,8 @@ namespace Engine
   // TODO: Defaut ctor for OrthographicCamera???
   Application::Application()
   {
+    EN_PROFILE_FUNCTION();
+
     // Create Window
     EN_CORE_ASSERT(!s_Instance, "Application already exists!");
     s_Instance = this;
@@ -24,11 +26,15 @@ namespace Engine
 
   Application::~Application()
   {
+    EN_PROFILE_FUNCTION();
+
     Renderer::Shutdown();
   }
 
   void Application::Run()
   {
+    EN_PROFILE_FUNCTION();
+
     /*
     WindowResizeEvent e(1920, 1080);
     if (e.IsInCategory(EventCategoryApplication))
@@ -44,6 +50,7 @@ namespace Engine
     */
     while (m_Running)
     {
+      EN_PROFILE_SCOPE("RunLoop");
       float time = (float)glfwGetTime();
       Timestep dt = time - m_LastFrameTime;
       m_LastFrameTime = time;
@@ -51,6 +58,7 @@ namespace Engine
       // Submit layers for rendering if window is visible
       if (!m_Minimized)
       {
+        EN_PROFILE_SCOPE("LayerStack OnUpdate");
         for (Layer* layer : m_LayerStack)
         {
           layer->OnUpdate(dt);
@@ -61,7 +69,11 @@ namespace Engine
       m_ImGuiLayer->Begin();
       for (Layer* layer : m_LayerStack)
       {
-        layer->OnImGuiRender();
+        EN_PROFILE_SCOPE("LayerStack OnImGuiRender");
+        for (Layer* layer : m_LayerStack)
+        {
+          layer->OnImGuiRender();
+        }
       }
       m_ImGuiLayer->End();
 
@@ -71,16 +83,24 @@ namespace Engine
 
   void Application::PushLayer(Layer* layer)
   {
+    EN_PROFILE_FUNCTION();
+
     m_LayerStack.PushLayer(layer);
+    layer->OnAttach();
   }
 
   void Application::PushOverlay(Layer* layer)
   {
+    EN_PROFILE_FUNCTION();
+
     m_LayerStack.PushOverlay(layer);
+    layer->OnAttach();
   }
 
   void Application::OnEvent(Event& event)
   {
+    EN_PROFILE_FUNCTION();
+
     EventDispatcher dispatcher(event);
     dispatcher.Dispatch<WindowCloseEvent>(EN_BIND_EVENT_FN(Application::OnWindowClose));
     dispatcher.Dispatch<WindowResizeEvent>(EN_BIND_EVENT_FN(Application::OnWindowResize));
@@ -102,6 +122,8 @@ namespace Engine
   }
   bool Application::OnWindowResize(WindowResizeEvent& event)
   {
+    EN_PROFILE_FUNCTION();
+
     if (event.GetWidth() == 0 || event.GetHeight() == 0)
     {
       m_Minimized = true;

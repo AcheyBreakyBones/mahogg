@@ -18,7 +18,6 @@ namespace Engine
     virtual void OnDetach() override;
     //void OnUpdate();
     //void OnEvent(Event& event);
-    virtual void OnImGuiRender() override;
     void Begin();
     void End();
   //private:
